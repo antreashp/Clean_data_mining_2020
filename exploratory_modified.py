@@ -26,7 +26,7 @@ print(df.head(1))
 print(processed_df.head(1))
 print(processed_df.columns)
 
-def violin(df=processed_df, var='mood', group='user_id'):
+def violin(df, var='mood', group='user_id'):
     data = []
     ticks = []
     for i in set(processed_df[group]):
@@ -50,19 +50,17 @@ def violin(df=processed_df, var='mood', group='user_id'):
     ax.grid(axis='y')
     plt.pyplot.show(ax)
 
-violin()
 
+if __name__ == '__main__':
 
-violin(var='date', group='user_id')  
+    violin(df)
 
-#still figuring out how to remove the nans in the raw data
-violin(df=df, var='mood', group='user_id') 
+    violin(df, var='date', group='user_id')
 
+    #still figuring out how to remove the nans in the raw data
+    violin(df=df, var='target', group='user_id')
 
+    sns.distplot(df[df['user_id']=='AS14.01'].mood)
 
+    # sns.distplot(date)
 
-sns.distplot(df[df['user_id']=='AS14.01'].mood)
-
-# sns.distplot(date)
-
-    
