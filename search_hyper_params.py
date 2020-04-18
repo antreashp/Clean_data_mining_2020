@@ -1,58 +1,76 @@
 from experiment import Experiment
 import skopt
 
+from preprosses import preprocess
 
 
-model_type = 'mlp'
-trans_trg = False
-win_size = 1
-mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 
-            'win_size'      : win_size,
-            'batch_size'    : 128,
-            'epochs'        : 50,
-            'lr'            : 0.0003,
-            'use_pca'       : False,
-            'pca_var_hold'  : 0.995,
-            'model_type'    : 'reg', #'cls'
-            'transform_targets'  : trans_trg,
-            'loss_fn'       : 'mse', #cross-entropy
-            'optim'         : 'adam',#sgd
-            'use_scheduler' : False, #true decreaseing  
-            'debug_mode'    : False 
-}
-mod_opt_xgb ={'max_depth'      : 15, 
-            'aplha'              : 100,
-            'colsample_bytree'   : 0.1,
-            'n_estimators'       : 10000,
-            'lr'                 : 0.1,
-            'use_pca'            : False,
-            'pca_var_hold'       : 0.995,
-            'transform_targets'  : trans_trg,
-            'max_delta_step'     : 2000, 
-            'gamma'              : 0.01 
 
-}
+HPO_PARAMS = {'n_calls':100,
+              'n_random_starts':10,
+              'base_estimator':'ET',
+              'acq_func':'EI',
+              'xi':0.02,
+              'kappa':1.96,
+              'n_points':10000,
+             }
+methods = ['average','max','max','max','max','max','max','max','max','max',
+'max','max','max','max','max','max','max','max','average','average',
+'average','average','average','average','average','average','average','average']
 
-options ={'model_type'        : model_type, # xgb  mlp
-            'win_size'          : win_size,
-            'batch_size'        : 128,
-            'data'              : None,
-            'transform_targets' : trans_trg,
-            'split' : 0.2,
-            'model_options' : mod_opt_xgb if 'xgb' in model_type else  mod_opt_mlp,
-            'methods'       : None
-}
+win_size = 3
+batch_size =128
+
+filename = 'data/RAW_Data.pickle'
+preprocess_instance = preprocess(filename, window_size=win_size, methods=methods)
+preprocess_instance.normalize()
+data = preprocess_instance.bin(include_remainder=False)
+
 SPACE =[skopt.space.Real(0.001, 0.1, name='lr', prior='log-uniform'),
-        skopt.space.Integer(5, 9, name='batch_size'),
-        skopt.space.Integer(7, 11, name='hid_layer1'),
-        skopt.space.Integer(7, 11, name='hid_layer2'),
-        skopt.space.Integer(0, 2, name='dim_redu_params'),
-        skopt.space.Integer(0, 3, name='name'),]
-exp = Experiment(options)
-res = exp.train_and_test()
-print(res)
+        skopt.space.Integer(5, 10, name='max_depth'),
+        skopt.space.Real(0.001, 0.1, name='gamma'),
+        skopt.space.Integer(10, 200, name='alpha'),
+        skopt.space.Real(0.01, 0.3, name='colsample_bytree'),
+        skopt.space.Categorical([64, 128,512,1024,4096], name='n_estimators'),
+        skopt.space.Categorical([True,False], name='use_pca'),
+        skopt.space.Categorical([True,False], name='transform_targets'),]
+
+
+# exp = Experiment(options)
+# res = exp.train_and_test()
+# print(res)
+
+@skopt.utils.use_named_args(SPACE)
+def search(**params):
+        all_params = params
+        global data 
+
+        mod_opt_xgb = { 'max_depth'          : all_params['max_depth'], 
+                        'aplha'              : all_params['alpha'],
+                        'colsample_bytree'   : all_params['colsample_bytree'],
+                        'n_estimators'       : all_params['n_estimators'],
+                        'lr'                 : all_params['lr'],
+                        'use_pca'            : all_params['use_pca'],
+                        'pca_var_hold'       : 0.995,
+                        'transform_targets'  : all_params['transform_targets'],
+                        'max_delta_step'     : 2000, 
+                        'gamma'              : all_params['gamma'] 
+
+        }
+
+        options = {     'model_type'        : 'xgb', # xgb  mlp
+                        'win_size'          : win_size,
+                        'batch_size'        : 128,
+                        'data'              : data,
+                        'transform_targets' : all_params['transform_targets'],
+                        'split' : 0.2,
+                        'model_options' : mod_opt_xgb ,
+                        'methods'       : None
+        }
+        options.update(mod_opt_xgb)
+
+        exp = Experiment(options)
 
 
 
 
-
+results = skopt.forest_minimize(search, SPACE, **HPO_PARAMS)

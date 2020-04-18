@@ -23,6 +23,8 @@ class Experiment():
             self.preprocess_instance.normalize()
 
             self.preprocess_instance.bin(include_remainder=False)
+        else:
+            self.preprocess_instance =data
         # if self.transform_targets:
             # self.preprocess_instance.transform_target()
         processed_df =  self.preprocess_instance.create_dataframe_pros()
@@ -53,8 +55,8 @@ class Experiment():
 
 if __name__ == "__main__":
 
-    model_type = 'mlp'
-    trans_trg = True
+    model_type = 'xgb'
+    trans_trg = False
     win_size = 1
     mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 
               'win_size'      : win_size,

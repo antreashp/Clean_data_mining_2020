@@ -6,7 +6,7 @@ from tqdm import tqdm
 from datetime import date as date_lib
 
 
-filename = '../dataset_mood_smartphone.csv'
+filename = 'data/dataset_mood_smartphone.csv'
 with open (filename,'r') as f: 
     data = f.readlines()
 
