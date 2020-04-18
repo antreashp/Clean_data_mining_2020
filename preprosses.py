@@ -278,10 +278,7 @@ class preprocess:
                     has_mood = True
                 row = [user, day]
                 for i, value in enumerate(record):
-                    if i >= self.indexes['appcat'][0] and i < self.indexes['appcat'][1]:
-                        row.append(0 if value is None else value)
-                    else:
-                        row.append(value)
+                    row.append(0 if value is None else value)
                 data_matrix.append(row)
                 if not has_mood:
                     days_without_mood.add(day)
