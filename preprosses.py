@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pickle
 import shutil
 from torch.utils.tensorboard import SummaryWriter
+from math import *
 
 var_ids = ['mood', 'circumplex.arousal', 'circumplex.valence', 'activity', 'screen', 'call', 'sms', 'appCat.builtin',
            'appCat.communication', 'appCat.entertainment', 'appCat.finance', 'appCat.game', 'appCat.office',
@@ -17,7 +18,7 @@ var_ids = ['mood', 'circumplex.arousal', 'circumplex.valence', 'activity', 'scre
            'morning', 'noon', 'afternoon', 'night', 'winter', 'spring', 'spring2', 'spring3','summer','mood']
 
 class preprocess:
-    def __init__(self, filename, window_size=1, methods=None,writer = None):
+    def __init__(self, filename, window_size=1, methods=None,writer = None, transform_appcat=None, appcat_scale=1/60):
         """
         :param filename: str
         :param window_size: int
@@ -49,7 +50,14 @@ class preprocess:
            'appCat.communication', 'appCat.entertainment', 'appCat.finance', 'appCat.game', 'appCat.office',
            'appCat.other', 'appCat.social', 'appCat.travel', 'appCat.unknown', 'appCat.utilities', 'appCat.weather',
            'morning', 'noon', 'afternoon', 'night', 'winter', 'spring', 'spring2', 'spring3','summer','average_mood']
-        # inclusive
+        self.appcat_functions = {
+            'arctan',
+        }
+        self.appcat_scale = appcat_scale
+        if transform_appcat in self.appcat_functions:
+            self.transform_appcat_method = transform_appcat
+        else:
+            self.transform_appcat_method = 'default'
         
     def set_index(self, indexes):
         """
@@ -60,6 +68,15 @@ class preprocess:
         """
         for key, value in indexes.items():
             self.indexes[key] = value
+
+    def transform_appcat(self, value):
+        value *= self.appcat_scale
+        functions = {
+            'default': lambda x: x * self.appcat_scale,
+            'scale': lambda x: x,
+            'arctan': lambda x: np.arctan(x) / (pi / 2)
+        }
+        return functions[self.transform_appcat_method](value)
 
     def average(self, record):
         """
@@ -122,12 +139,16 @@ class preprocess:
                             record[i] = 0
                         if max_values[i] < record[i]:
                             max_values[i] = record[i]
+            print(max_values)
             for date in date_keys:
                 date_data = user_data[date]
                 for i in range(len(date_data)):
                     record = date_data[i]
                     for j in range(self.indexes['appcat'][0], self.indexes['appcat'][1] + 1):
-                        record[j] = record[j] / max_values[j] if max_values[j] != 0 else 0
+                        if self.transform_appcat_method == 'default':
+                            record[j] = record[j] / max_values[j] if max_values[j] != 0 else 0
+                        else:
+                            record[j] = self.transform_appcat(record[j])
                     self.data[user][date][i] = record
 
     def bin(self, include_remainder=False):
@@ -352,7 +373,7 @@ def save_numpy(arr,filename):
 # writer = SummaryWriter(os.path.join('runs','benchmark_win'+str(win_size)),flush_secs=1)
         
 if __name__ == '__main__':
-    
+    print(np.arctan(1) / pi * 2)
     for win_size in range(1,6):
         '''change methods here'''
         methods = ['average','max','max','max','max','max','max','max','max','max',
