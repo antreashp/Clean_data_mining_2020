@@ -55,7 +55,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
     win_size = options['win_size']
     if exp_name is None:
 
-        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+'_'+str(batch_size)+'_'+str(lr)+'_win'+str(win_size)
+        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+str(round(pca_var_hold))+'_'+str(batch_size)+'_'+str(round(lr,2))+'_win'+str(win_size)
     if os.path.exists(exp_name):
         shutil.rmtree(exp_name)
 
