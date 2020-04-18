@@ -129,7 +129,7 @@ class preprocess:
         """
         :param record: list
         """
-        method = self.methods[0] is self.methods is not None
+        method = self.methods[0] if self.methods is not None else 'average'
         moods = []
         for data_point in record:
             if data_point[self.indexes['target'][0]] is not None:
