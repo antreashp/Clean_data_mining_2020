@@ -41,6 +41,7 @@ class preprocess:
             'target': [0, 0],
             'valence': [1, 1],
             'arousal': [2, 2],
+            'activity': [3, 3],
             'screen': [4, 4],
             'call_sms': [5, 6],
             'appcat': [7, 18],
@@ -85,11 +86,23 @@ class preprocess:
         :param record: list
         """
         methods = ['average'] * len(record[0]) if self.methods is None else self.methods
-
-        return [(sum([x[i] for x in record if x[i] is not None]) / len([x for x in record if x[i] is not None])) if
+        if all([x[self.indexes['activity'][0]] is None for x in record]):
+            average_activity = [None]
+        else:
+            average_activity = [(sum([x[self.indexes['activity'][0]] for x in record if x[self.indexes['activity'][0]] is not None]) / len([x for x in record if x[self.indexes['activity'][0]] is not None])) if
+                methods[self.indexes['activity'][0]] == 'average' else max([x[self.indexes['activity'][0]] for x in record if x[self.indexes['activity'][0]] is not None]) if methods[self.indexes['activity'][0]] == 'max' else
+                min([x[self.indexes['activity'][0]] for x in record if x[self.indexes['activity'][0]] is not None])]
+        average_appcat = [(sum([x[i] for x in record if x[i] is not None]) / len([x for x in record if x[i] is not
+                                                                                None])) if
                 methods[i] == 'average' else max([x[i] for x in record if x[i] is not None]) if methods[i] == 'max' else
                 min([x[i] for x in record if x[i] is not None]) for i in range(self.indexes['appcat'][0],
                                                                                self.indexes['appcat'][1] + 1)]
+        average_call_sms = [(sum([x[i] for x in record if x[i] is not None]) / len([x for x in record if x[i] is not
+                                                                                None])) if
+                methods[i] == 'average' else max([x[i] for x in record if x[i] is not None]) if methods[i] == 'max' else
+                min([x[i] for x in record if x[i] is not None]) for i in range(self.indexes['call_sms'][0],
+                                                                               self.indexes['call_sms'][1] + 1)]
+        return average_activity + average_call_sms + average_appcat
 
     def average_mood(self, record):
         """
@@ -157,7 +170,7 @@ class preprocess:
                     self.data[user][date][i][self.indexes['screen'][0]] = elapsed_times[self.indexes['screen'][0]]
                     for j in range(self.indexes['appcat'][0], self.indexes['appcat'][1] + 1):
                         self.data[user][date][i][j] = elapsed_times[j]
-                        
+
             for date in date_keys:
                 date_data = user_data[date]
                 for i in range(len(date_data)):
@@ -395,7 +408,6 @@ def save_numpy(arr,filename):
 # writer = SummaryWriter(os.path.join('runs','benchmark_win'+str(win_size)),flush_secs=1)
         
 if __name__ == '__main__':
-    print(np.arctan(1) / pi * 2)
     for win_size in range(1,6):
         '''change methods here'''
         methods = ['average','max','max','max','max','max','max','max','max','max',
