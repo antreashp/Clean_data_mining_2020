@@ -24,12 +24,13 @@ from mood_dataset import MOOD
 from models import MLP
 from transform import Transform
 import xgboost as xgb
-def accat(out,trg,thresh=0.5,preprocess_instance=None ):
-        out = out.detach().cpu().numpy().squeeze()
-        trg = trg.detach().cpu().numpy().squeeze()
-        if model_options['transform_targets'] :
-            out = TRANSF.decode(out*9)
-            trg = TRANSF.decode(trg*9)
+def accat(out,trg,thresh=0.5,preprocess_instance=None, transform_targets=False ):
+        out = out.detach().cpu().numpy().squeeze() *9
+        trg = trg.detach().cpu().numpy().squeeze() *9
+        if transform_targets:
+            out = preprocess_instance.decode(out)
+            trg = preprocess_instance.decode(trg)
+        
         diff = np.abs(out - trg)
         # print(diff)
         diff[diff > thresh] = 1
@@ -62,9 +63,9 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
     writer = SummaryWriter(exp_name,flush_secs=1)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    TRANSF = Transform(y_train)
 
-    if model_options['transform_targets']:
-        TRANSF = Transform(y_train)
+    if options['transform_targets']:
         y_train = TRANSF.fit(y_train)
         y_test = TRANSF.fit(y_test)
     if use_pca and 'Raw' in exp_name:
@@ -157,7 +158,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
                 """
                 for i in range(len(accsat)):
 
-                    correct_array[i] += accat(outputs,labels,thresh=accsat[i],preprocess_instance=TRANSF)
+                    correct_array[i] += accat(outputs,labels,thresh=accsat[i],preprocess_instance=TRANSF, transform_targets=options['transform_targets'])
 
                 # total_loss += loss.item()
                 total += labels.size(0)
