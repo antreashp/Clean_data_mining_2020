@@ -25,11 +25,12 @@ from models import MLP
 from transform import Transform
 import xgboost as xgb
 def accat(out,trg,thresh=0.5,preprocess_instance=None, transform_targets=False ):
-        out = out.detach().cpu().numpy().squeeze()
-        trg = trg.detach().cpu().numpy().squeeze()
+        out = out.detach().cpu().numpy().squeeze() *9
+        trg = trg.detach().cpu().numpy().squeeze() *9
         if transform_targets:
-            out = preprocess_instance.decode(out*9)
-            trg = preprocess_instance.decode(trg*9)
+            out = preprocess_instance.decode(out)
+            trg = preprocess_instance.decode(trg)
+        
         diff = np.abs(out - trg)
         # print(diff)
         diff[diff > thresh] = 1
