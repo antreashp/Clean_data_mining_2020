@@ -139,7 +139,6 @@ class preprocess:
                             record[i] = 0
                         if max_values[i] < record[i]:
                             max_values[i] = record[i]
-            print(max_values)
             for date in date_keys:
                 date_data = user_data[date]
                 for i in range(len(date_data)):
@@ -379,7 +378,7 @@ if __name__ == '__main__':
         methods = ['average','max','max','max','max','max','max','max','max','max',
         'max','max','max','max','max','max','max','max','average','average',
         'average','average','average','average','average','average','average','average']
-        preprocess_instance = preprocess(filename, window_size=win_size, methods=methods)
+        preprocess_instance = preprocess(filename, window_size=win_size, methods=methods, transform_appcat='arctan')
         preprocess_instance.normalize()
         none_days = 0
         total_days = 0
