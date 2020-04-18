@@ -41,7 +41,9 @@ class preprocess:
             'target': [0, 0],
             'valence': [1, 1],
             'arousal': [2, 2],
-            'appcat': [3, 18],
+            'screen': [4, 4],
+            'call_sms': [5, 6],
+            'appcat': [7, 18],
             'time': [19, 22],
             'season': [23, 27],
             'mood': [28, 28]
@@ -133,16 +135,37 @@ class preprocess:
             max_values = [0 for x in user_data[date_keys[0]][0]]
             for date in date_keys:
                 date_data = user_data[date]
+                elapsed_times = [0  for x in range(self.indexes['mood'][1] + 1)]
                 for record in date_data:
+                    for i in range(self.indexes['call_sms'][0], self.indexes['call_sms'][1] + 1):
+                        if record[i] is None:
+                            record[i] = 0
+                    if record[self.indexes['screen'][0]] is None:
+                        record[self.indexes['screen'][0]] = 0
+                    else:
+                        elapsed_times[self.indexes['screen'][0]] += record[self.indexes['screen'][0]]
+                    if max_values[self.indexes['screen'][0]] < record[self.indexes['screen'][0]]:
+                        max_values[self.indexes['screen'][0]] = record[self.indexes['screen'][0]]
                     for i in range(self.indexes['appcat'][0], self.indexes['appcat'][1] + 1):
                         if record[i] is None:
                             record[i] = 0
+                        else:
+                            elapsed_times[i] += record[i]
                         if max_values[i] < record[i]:
                             max_values[i] = record[i]
+                for i, record in enumerate(user_data[date]):
+                    self.data[user][date][i][self.indexes['screen'][0]] = elapsed_times[self.indexes['screen'][0]]
+                    for j in range(self.indexes['appcat'][0], self.indexes['appcat'][1] + 1):
+                        self.data[user][date][i][j] = elapsed_times[j]
+                        
             for date in date_keys:
                 date_data = user_data[date]
                 for i in range(len(date_data)):
                     record = date_data[i]
+                    if self.transform_appcat_method == 'default':
+                        record[self.indexes['screen'][0]] = record[self.indexes['screen'][0]] / max_values[self.indexes['screen'][0]] if max_values[self.indexes['screen'][0]] != 0 else 0
+                    else:
+                        record[self.indexes['screen'][0]] = self.transform_appcat(record[self.indexes['screen'][0]])
                     for j in range(self.indexes['appcat'][0], self.indexes['appcat'][1] + 1):
                         if self.transform_appcat_method == 'default':
                             record[j] = record[j] / max_values[j] if max_values[j] != 0 else 0
