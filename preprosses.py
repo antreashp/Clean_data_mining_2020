@@ -82,7 +82,8 @@ class preprocess:
         functions = {
             'default': lambda x: x * self.appcat_scale,
             'scale': lambda x: x,
-            'arctan': lambda x: np.arctan(x) / (pi / 2)
+            'arctan': lambda x: np.arctan(x) / (pi / 2),
+            'log': lambda x: 1 if log(x + 1) >= 1 else log(x + 1),
         }
         return functions[self.transform_appcat_method](value)
 
