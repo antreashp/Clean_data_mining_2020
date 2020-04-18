@@ -1,7 +1,7 @@
 import numpy as np
 from preprosses import preprocess
-from train_xgb import train_xgb
-from train_mlp import train_mlp
+from train_model import train_xgb,train_mlp
+
 import torch
 
 from sklearn.model_selection import train_test_split
