@@ -36,6 +36,8 @@ def violin(df=processed_df, var='mood', group='user_id'):
         length.append(len(data[0]))
     if length[0] == max(length):
         print('balanced')
+        print(length)
+        print(data)
     else: print('unbalanced')
     fig, ax = plt.subplots(figsize=(9,4))
     ax.violinplot(data, showmeans=True)
@@ -45,10 +47,17 @@ def violin(df=processed_df, var='mood', group='user_id'):
     plt.grid(axis='y')
     plt.show
 
-violin()    
 
 
-sns.distplot(processed_df.date)
+violin(var='date', group='user_id')  
+
+#still figuring out how to remove the nans in the raw data
+violin(df=df, var='mood', group='user_id') 
+
+
+
+
+sns.distplot(df[df['user_id']=='AS14.01'].mood)
 
 sns.distplot(date)
 
