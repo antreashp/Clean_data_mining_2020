@@ -9,6 +9,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Experiment():
     def __init__(self,options = None):
+        
         self.model_type = options['model_type']
         self.data =  options['data']
         self.win_size = options['win_size']
@@ -23,14 +24,19 @@ class Experiment():
             self.preprocess_instance.normalize()
 
             self.preprocess_instance.bin(include_remainder=False)
+            processed_df = self.preprocess_instance.create_dataframe_pros()
+        else:
+            processed_df = options['data']
+        # processed_df = self.preprocess_instance
         # if self.transform_targets:
             # self.preprocess_instance.transform_target()
-        processed_df =  self.preprocess_instance.create_dataframe_pros()
+        
 
         self.split = options['split']
         X,y = self.df_to_np(processed_df)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=self.split , random_state=42)
-    
+    def update_opt(self,options):
+        self.model_options = options 
     def df_to_np(self,df):
         X = []
         y =[]
@@ -53,8 +59,8 @@ class Experiment():
 
 if __name__ == "__main__":
 
-    model_type = 'mlp'
-    trans_trg = True
+    model_type = 'xgb'
+    trans_trg = False
     win_size = 1
     mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 
               'win_size'      : win_size,
