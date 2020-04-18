@@ -6,3 +6,5 @@ models/*
 *.pyc
 *.npy
 *.pyc
+*.xml___jb_tmp___
+*.iml

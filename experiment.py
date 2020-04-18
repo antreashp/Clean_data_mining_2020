@@ -54,7 +54,7 @@ class Experiment():
 if __name__ == "__main__":
 
     model_type = 'mlp'
-    trans_trg = False
+    trans_trg = True
     win_size = 1
     mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 
               'win_size'      : win_size,
@@ -64,6 +64,7 @@ if __name__ == "__main__":
               'use_pca'       : False,
               'pca_var_hold'  : 0.995,
               'model_type'    : 'reg', #'cls'
+              'transform_targets'  : trans_trg,
               'loss_fn'       : 'mse', #cross-entropy
               'optim'         : 'adam',#sgd
               'use_scheduler' : False, #true decreaseing  
