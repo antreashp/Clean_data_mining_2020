@@ -97,12 +97,21 @@ class preprocess:
                 methods[i] == 'average' else max([x[i] for x in record if x[i] is not None]) if methods[i] == 'max' else
                 min([x[i] for x in record if x[i] is not None]) for i in range(self.indexes['appcat'][0],
                                                                                self.indexes['appcat'][1] + 1)]
+        average_screen = [(sum(
+            [x[self.indexes['screen'][0]] for x in record if x[self.indexes['screen'][0]] is not None]) / len(
+            [x for x in record if x[self.indexes['screen'][0]] is not None])) if
+                            methods[self.indexes['screen'][0]] == 'average' else max(
+            [x[self.indexes['screen'][0]] for x in record if x[self.indexes['screen'][0]] is not None]) if methods[
+                                                                                                                   self.indexes[
+                                                                                                                       'screen'][
+                                                                                                                       0]] == 'max' else
+        min([x[self.indexes['screen'][0]] for x in record if x[self.indexes['screen'][0]] is not None])]
         average_call_sms = [(sum([x[i] for x in record if x[i] is not None]) / len([x for x in record if x[i] is not
                                                                                 None])) if
                 methods[i] == 'average' else max([x[i] for x in record if x[i] is not None]) if methods[i] == 'max' else
                 min([x[i] for x in record if x[i] is not None]) for i in range(self.indexes['call_sms'][0],
                                                                                self.indexes['call_sms'][1] + 1)]
-        return average_activity + average_call_sms + average_appcat
+        return average_activity + average_screen + average_call_sms + average_appcat
 
     def average_mood(self, record):
         """
