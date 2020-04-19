@@ -330,6 +330,7 @@ class preprocess:
     def bench_mark(self):
         count_accurate = 0
         count_total = 0
+        loss_total = []
         for i, user_data in enumerate(self.processed_data.values()):
             for day_data in user_data.values():
                 if self.encoded:
@@ -344,13 +345,16 @@ class preprocess:
                     # if mood is not None and day_data[0] <= day_data[-1] * 9 + 0.5 and mood > day_data[-1] * 9\
                     # - 0.5:
                     count_accurate += 1
+                if mood is not None:
+                    loss_total.append(mood - day_data[-1])
                 count_total += 1
             temp_acc = count_accurate / count_total
-
+        loss = np.array(loss_total).mean()
             # self.writer.add_scalar('Acc/val_@'+str(0.05),float(temp_acc*100), i)
 
         accuracy = count_accurate / count_total
-        return accuracy
+
+        return accuracy, loss
 
     def transform_target(self):
         self.encoded = True
@@ -458,8 +462,8 @@ if __name__ == '__main__':
         exp_name = 'runs/benchmark_win' + str(win_size)
         if os.path.exists(exp_name):
             shutil.rmtree(exp_name)
-
-        xaxis = np.ones((50)) * preprocess_instance.bench_mark()
+        acc, loss = preprocess_instance.bench_mark()
+        xaxis = np.ones((50)) * acc
 
         print('benchmark accuracy: ', preprocess_instance.bench_mark())
         '''Save preprocess_instance.processed_data:'''
