@@ -27,6 +27,8 @@ class Experiment():
             processed_df = self.preprocess_instance.create_dataframe_pros()
         else:
             processed_df = options['data']
+        indexNames = processed_df[ processed_df['user_id'] =='AS14.7' ].index
+        processed_df= processed_df.drop(indexNames )
         # processed_df = self.preprocess_instance
         # if self.transform_targets:
             # self.preprocess_instance.transform_target()
@@ -59,7 +61,7 @@ class Experiment():
 
 if __name__ == "__main__":
 
-    model_type = 'xgb'
+    model_type = 'mlp'
     trans_trg = False
     win_size = 1
     mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 

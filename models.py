@@ -33,7 +33,13 @@ class MLP(nn.Module):
             last_layer = nn.Linear(512, 1)
         elif model_type =='cls':
             last_layer = nn.Linear(512, n_classes)
-            
+            # nn.Linear(needed_dim, 2048),
+            # nn.ReLU(),
+            # nn.Linear(2048, 1000),
+            # nn.ReLU(),    
+            # nn.Linear(1000, 512),
+            # nn.ReLU(),
+            # last_layer
         self.layers = nn.Sequential(
             nn.Linear(needed_dim, 2048),
             nn.ReLU(),
@@ -49,7 +55,37 @@ class MLP(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.layers(x)
         return x     
+class MLP_small(nn.Module):
+    def __init__(self,needed_dim=None,model_type='reg',n_classes=None):
+        super(MLP, self).__init__()
+        if  needed_dim is None:
+            print('needing information about the input dim')
+            exit()
+        if model_type == 'reg':
+            last_layer = nn.Linear(16, 1)
+        elif model_type =='cls':
+            last_layer = nn.Linear(16, n_classes)
+            # nn.Linear(needed_dim, 2048),
+            # nn.ReLU(),
+            # nn.Linear(2048, 1000),
+            # nn.ReLU(),    
+            # nn.Linear(1000, 512),
+            # nn.ReLU(),
+            # last_layer
+        self.layers = nn.Sequential(
+            nn.Linear(needed_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, 16),
+            nn.ReLU(),    
 
+            last_layer
+        )
+        
+    def forward(self, x):
+        # convert tensor (128, 1, 28, 28) --> (128, 1*28*28)
+        x = x.view(x.size(0), -1)
+        x = self.layers(x)
+        return x     
 
 if __name__ == '__main__':
     from mood_dataset import MOOD

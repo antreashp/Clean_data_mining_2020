@@ -8,3 +8,4 @@ models/*
 *.pyc
 *.xml___jb_tmp___
 *.iml
+results/*

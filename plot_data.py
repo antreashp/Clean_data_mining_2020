@@ -98,9 +98,9 @@ if __name__ == "__main__":
       
     plotter = Plotter()
     # 
-    # for var in ['cat','num','times','months']:
-        # ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=True)
-        # ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=False)
+    for var in ['cat','num','times','months']:
+        ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=True)
+        ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=False)
     # print(plotter.df_pros.head(2))
     
     # print(plotter.df.head(2))

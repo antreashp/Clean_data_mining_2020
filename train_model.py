@@ -60,7 +60,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
         shutil.rmtree(exp_name)
 
     # time.sleep(1)
-    writer = SummaryWriter(exp_name,flush_secs=1)
+    # writer = SummaryWriter(exp_name,flush_secs=1)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     TRANSF = Transform(y_train)
@@ -125,7 +125,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
 
             loss =loss_fn(outputs,labels)
             # print('loss: ',loss.item())
-            writer.add_scalar('Loss/train', loss.item(), len(train_loader)*epoch+i)
+            # writer.add_scalar('Loss/train', loss.item(), len(train_loader)*epoch+i)
 
             loss.backward()
             optimizer.step()
@@ -173,15 +173,15 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
         # scheduler.step(np.mean(valid_losses))
         for i in range(len(accsat)):
             accs[i] = 100*correct_array[i]/total
-            writer.add_scalar('Acc/val_@'+str(accsat[i]), accs[i], epoch)
+            # writer.add_scalar('Acc/val_@'+str(accsat[i]), accs[i], epoch)
         
-        if np.mean(valid_losses) < best:
-            best = np.mean(valid_losses)
-            torch.save(model.state_dict(),os.path.join(os.getcwd(),'models','meh.pth'))
+        if float(accs[1] /100) > best:
+            best = float(accs[1] /100)
+            # torch.save(model.state_dict(),os.path.join(os.getcwd(),'models','meh.pth'))
         
-        writer.add_scalar('Loss/val', np.mean(valid_losses), epoch)
+        # writer.add_scalar('Loss/val', np.mean(valid_losses), epoch)
         # valid_acc_list.append(accuracy)
-    return float(accs[1] /100)
+    return best
 
 
 
