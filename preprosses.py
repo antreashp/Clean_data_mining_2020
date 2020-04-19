@@ -78,6 +78,8 @@ class preprocess:
             self.indexes[key] = value
 
     def transform_appcat(self, value):
+        if value < 0:
+            value = 0
         value *= self.appcat_scale
         functions = {
             'default': lambda x: x * self.appcat_scale,
