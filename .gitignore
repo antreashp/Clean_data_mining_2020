@@ -9,3 +9,4 @@ models/*
 *.xml___jb_tmp___
 *.iml
 results/*
+.ipynb_checkpoints/numerical_analysis-checkpoint.ipynb

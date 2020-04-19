@@ -59,7 +59,7 @@ class preprocess:
                                'morning', 'noon', 'afternoon', 'night', 'winter', 'spring', 'spring2', 'spring3',
                                'summer', 'average_mood']
         self.appcat_functions = {
-            'arctan',
+            'arctan', 'scale', 'log',
         }
         self.appcat_scale = appcat_scale
         if transform_appcat in self.appcat_functions:
@@ -129,7 +129,7 @@ class preprocess:
         """
         :param record: list
         """
-        method = self.methods[0] is self.methods is not None
+        method = self.methods[0] if self.methods is not None else 'average'
         moods = []
         for data_point in record:
             if data_point[self.indexes['target'][0]] is not None:
@@ -244,7 +244,7 @@ class preprocess:
                 current_index += self.step
             self.processed_data[user] = processed_user_data
 
-    def create_dataframe(self):
+    def create_dataframe(self, convert_none_values_to_zero=False, discard_days_without_mood=False):
         data_matrix = []
         days_without_mood = set()
         for user, user_data in self.data.items():
@@ -256,11 +256,11 @@ class preprocess:
                     row = [user, day]
                     for i, value in enumerate(record):
                         if i >= self.indexes['appcat'][0] and i < self.indexes['appcat'][1]:
-                            row.append(0 if value is None else value)
+                            row.append(0 if value is None and convert_none_values_to_zero else value)
                         else:
                             row.append(value)
                     data_matrix.append(row)
-                if not has_mood:
+                if discard_days_without_mood and not has_mood:
                     days_without_mood.add(day)
         data_matrix_clear = []
         for row in data_matrix:
