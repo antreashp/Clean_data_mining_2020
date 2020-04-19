@@ -16,9 +16,9 @@ class Experiment():
         self.transform_targets = options['transform_targets']
         self.model_options = options['model_options']
         if self.data is None:
-            self.methods = ['average','max','max','max','max','max','max','max','max','max',
-        'max','max','max','max','max','max','max','max','average','average',
-        'average','average','average','average','average','average','average','average'] if options['methods'] is None else options['methods']
+            self.methods  = ['average', 'max', 'max', 'max', 'max', 'max', 'max', 'max', 'max', 'max',
+                   'max', 'max', 'max', 'max', 'max', 'max', 'max', 'max', 'average', 'average',
+                   'average', 'average', 'average', 'average', 'average', 'average', 'average', 'average'] if options['methods'] is None else options['methods']
             filename = 'data/RAW_Data.pickle'
             self.preprocess_instance = preprocess(filename, window_size=self.win_size, methods=self.methods)
             self.preprocess_instance.normalize()
@@ -29,6 +29,10 @@ class Experiment():
             processed_df = options['data']
         indexNames = processed_df[ processed_df['user_id'] =='AS14.7' ].index
         processed_df= processed_df.drop(indexNames )
+
+
+        print('mean',processed_df['appCat.communication'].mean())
+
         # processed_df = self.preprocess_instance
         # if self.transform_targets:
             # self.preprocess_instance.transform_target()
@@ -54,10 +58,10 @@ class Experiment():
     
     def train_and_test(self):
         if self.model_type == 'xgb':
-            res = train_xgb(self.model_options,self.X_train, self.X_test, self.y_train, self.y_test)
+            res,loss = train_xgb(self.model_options,self.X_train, self.X_test, self.y_train, self.y_test)
         elif self.model_type == 'mlp':
-            res = train_mlp(self.model_options,self.X_train, self.X_test, self.y_train, self.y_test)
-        return res
+            res,loss = train_mlp(self.model_options,self.X_train, self.X_test, self.y_train, self.y_test)
+        return res,loss
 
 if __name__ == "__main__":
 
@@ -67,9 +71,9 @@ if __name__ == "__main__":
     mod_opt_mlp ={'exp_name'      : None, #default if dont want to specify 
               'win_size'      : win_size,
               'batch_size'    : 128,
-              'epochs'        : 50,
-              'lr'            : 0.0003,
-              'use_pca'       : False,
+              'epochs'        : 100,
+              'lr'            : 0.0338,
+              'use_pca'       : True,
               'pca_var_hold'  : 0.995,
               'model_type'    : 'reg', #'cls'
               'transform_targets'  : trans_trg,
@@ -78,32 +82,32 @@ if __name__ == "__main__":
               'use_scheduler' : False, #true decreaseing  
               'debug_mode'    : False 
     }
-    mod_opt_xgb ={'max_depth'      : 15, 
-              'aplha'              : 100,
-              'colsample_bytree'   : 0.1,
-              'n_estimators'       : 10000,
-              'lr'                 : 0.1,
-              'use_pca'            : False,
-              'pca_var_hold'       : 0.995,
-              'transform_targets'  : trans_trg,
-              'max_delta_step'     : 2000, 
-              'gamma'              : 0.01 
+    # mod_opt_xgb ={'max_depth'      : 15, 
+    #           'aplha'              : 100,
+    #           'colsample_bytree'   : 0.1,
+    #           'n_estimators'       : 10000,
+    #           'lr'                 : 0.0338,
+    #           'use_pca'            : False,
+    #           'pca_var_hold'       : 0.995,
+    #           'transform_targets'  : trans_trg,
+    #           'max_delta_step'     : 2000, 
+    #           'gamma'              : 0.01 
 
-    }
+    # }
 
     options ={'model_type'        : model_type, # xgb  mlp
-              'win_size'          : win_size,
+              'win_size'          : 3,
               'batch_size'        : 128,
               'data'              : None,
-                'transform_targets' : trans_trg,
+              'transform_targets' : trans_trg,
               'split' : 0.2,
               'model_options' : mod_opt_xgb if 'xgb' in model_type else  mod_opt_mlp,
               'methods'       : None
     }
               
     exp = Experiment(options)
-    res = exp.train_and_test()
-    print(res)
+    res,loss = exp.train_and_test()
+    print(res,loss)
 
 
 

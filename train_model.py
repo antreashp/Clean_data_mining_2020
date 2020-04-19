@@ -55,12 +55,12 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
     win_size = options['win_size']
     if exp_name is None:
 
-        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+str(round(pca_var_hold))+'_'+str(batch_size)+'_'+str(round(lr,2))+'_win'+str(win_size)
+        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+str(round(pca_var_hold))+'_'+str(batch_size)+'_'+str(round(lr,2))+'_win'+str(win_size)+'_transf'+str(options['transform_targets'])
     if os.path.exists(exp_name):
         shutil.rmtree(exp_name)
 
     # time.sleep(1)
-    # writer = SummaryWriter(exp_name,flush_secs=1)
+    writer = SummaryWriter(exp_name,flush_secs=1)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     TRANSF = Transform(y_train)
@@ -125,7 +125,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
 
             loss =loss_fn(outputs,labels)
             # print('loss: ',loss.item())
-            # writer.add_scalar('Loss/train', loss.item(), len(train_loader)*epoch+i)
+            writer.add_scalar('Loss/train', loss.item(), len(train_loader)*epoch+i)
 
             loss.backward()
             optimizer.step()
@@ -173,15 +173,15 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
         # scheduler.step(np.mean(valid_losses))
         for i in range(len(accsat)):
             accs[i] = 100*correct_array[i]/total
-            # writer.add_scalar('Acc/val_@'+str(accsat[i]), accs[i], epoch)
+            writer.add_scalar('Acc/val_@'+str(accsat[i]), accs[i], epoch)
         
         if float(accs[1] /100) > best:
             best = float(accs[1] /100)
             # torch.save(model.state_dict(),os.path.join(os.getcwd(),'models','meh.pth'))
         
-        # writer.add_scalar('Loss/val', np.mean(valid_losses), epoch)
+        writer.add_scalar('Loss/val', np.mean(valid_losses), epoch)
         # valid_acc_list.append(accuracy)
-    return best
+    return best, np.mean(valid_losses)
 
 
 
@@ -211,5 +211,9 @@ def train_xgb(model_options, X_train, X_test, y_train, y_test):
     diff = abs(preds- y_test )
     # print(diff[:5])
     accuracy = (len(diff[diff<0.5]) )/preds.shape[0]
-    return accuracy    
+    xgb.plot_tree(xg_reg, num_trees=2)
+    fig = plt.gcf()
+    fig.set_size_inches(150, 100)
+    fig.savefig('results/best_xgb_wtransf'+str(round(accuracy,2))+'.png')
+    return accuracy    , diff.mean()
     # print(' accuracy, ',accuracy)
