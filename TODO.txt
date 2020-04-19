@@ -4,7 +4,7 @@ best mlp model
 
 
 best model on tranf ,or not
-decition tree
+decision tree
 best model pca or not
 gridsearch
 
