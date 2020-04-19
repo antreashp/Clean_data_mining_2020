@@ -40,8 +40,8 @@ class preprocess:
         self.encoded = False
         self.indexes = {
             'target': [0, 0],
-            'valence': [1, 1],
-            'arousal': [2, 2],
+            'valence': [2, 2],
+            'arousal': [1, 1],
             'activity': [3, 3],
             'screen': [4, 4],
             'call_sms': [5, 6],
