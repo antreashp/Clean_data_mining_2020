@@ -55,7 +55,7 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
     win_size = options['win_size']
     if exp_name is None:
 
-        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+str(round(pca_var_hold))+'_'+str(batch_size)+'_'+str(round(lr,2))+'_win'+str(win_size)
+        exp_name = 'runs/Raw_' +str(model_type)+'_pca_'+str(use_pca)+str(round(pca_var_hold))+'_'+str(batch_size)+'_'+str(round(lr,2))+'_win'+str(win_size)+'_transf'+str(options['transform_targets'])
     if os.path.exists(exp_name):
         shutil.rmtree(exp_name)
 
@@ -175,13 +175,13 @@ def train_mlp(options, X_train, X_test, y_train, y_test):
             accs[i] = 100*correct_array[i]/total
             writer.add_scalar('Acc/val_@'+str(accsat[i]), accs[i], epoch)
         
-        if np.mean(valid_losses) < best:
-            best = np.mean(valid_losses)
-            torch.save(model.state_dict(),os.path.join(os.getcwd(),'models','meh.pth'))
+        if float(accs[1] /100) > best:
+            best = float(accs[1] /100)
+            # torch.save(model.state_dict(),os.path.join(os.getcwd(),'models','meh.pth'))
         
         writer.add_scalar('Loss/val', np.mean(valid_losses), epoch)
         # valid_acc_list.append(accuracy)
-    return float(accs[1] /100)
+    return best, np.mean(valid_losses)
 
 
 
@@ -211,5 +211,9 @@ def train_xgb(model_options, X_train, X_test, y_train, y_test):
     diff = abs(preds- y_test )
     # print(diff[:5])
     accuracy = (len(diff[diff<0.5]) )/preds.shape[0]
-    return accuracy    
+    xgb.plot_tree(xg_reg, num_trees=2)
+    fig = plt.gcf()
+    fig.set_size_inches(150, 100)
+    fig.savefig('results/best_xgb_wtransf'+str(round(accuracy,2))+'.png')
+    return accuracy    , diff.mean()
     # print(' accuracy, ',accuracy)

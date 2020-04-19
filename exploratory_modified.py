@@ -9,7 +9,9 @@ import pandas as pd
 from preprosses import  preprocess
 import datetime
 import matplotlib as plt
+from matplotlib import pyplot
 import seaborn as sns
+import numpy as np
 
 filename = 'data/RAW_Data.pickle'
 methods = ['average','max','max','max','max','max','max','max','max','max',
@@ -24,7 +26,7 @@ print(df.head(1))
 print(processed_df.head(1))
 print(processed_df.columns)
 
-def violin(df=processed_df, var='mood', group='user_id'):
+def violin(df, var='mood', group='user_id'):
     data = []
     ticks = []
     for i in set(processed_df[group]):
@@ -39,26 +41,26 @@ def violin(df=processed_df, var='mood', group='user_id'):
         print(length)
         print(data)
     else: print('unbalanced')
-    fig, ax = plt.subplots(figsize=(9,4))
+    fig, ax = plt.pyplot.subplots(figsize=(9,4))
     ax.violinplot(data, showmeans=True)
-    plt.xticks(np.arange(1, len(ticks)+1), ticks, rotation='vertical')
-    plt.title('distribution of '+var+' by '+group+'')
+    ax.set_xticks(np.arange(1, len(ticks)+1))
+    ax.set_xticklabels(ticks, rotation='vertical')
+    #ax.title('distribution of '+var+' by '+group+'')
     ax.set_ylabel(''+var+'')
-    plt.grid(axis='y')
-    plt.show
+    ax.grid(axis='y')
+    plt.pyplot.show(ax)
 
 
+if __name__ == '__main__':
 
-violin(var='date', group='user_id')  
+    violin(df)
 
-#still figuring out how to remove the nans in the raw data
-violin(df=df, var='mood', group='user_id') 
+    violin(df, var='date', group='user_id')
 
+    #still figuring out how to remove the nans in the raw data
+    violin(df=df, var='target', group='user_id')
 
+    sns.distplot(df[df['user_id']=='AS14.01'].mood)
 
+    # sns.distplot(date)
 
-sns.distplot(df[df['user_id']=='AS14.01'].mood)
-
-sns.distplot(date)
-
-    

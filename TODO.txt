@@ -1,0 +1,10 @@
+
+best xgb model
+best mlp model
+
+
+best model on tranf ,or not
+decision tree
+best model pca or not
+gridsearch
+

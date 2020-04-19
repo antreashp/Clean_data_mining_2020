@@ -19,7 +19,7 @@ var_ids = ['mood', 'circumplex.arousal', 'circumplex.valence', 'activity', 'scre
 
 
 class preprocess:
-    def __init__(self, filename, window_size=1, methods=None, writer=None, transform_appcat=None, appcat_scale=1 / 60):
+    def __init__(self, filename, window_size=1, methods=None, writer=None, transform_appcat=None, appcat_scale=60 / 60):
         """
         :param filename: str
         :param window_size: int
@@ -40,8 +40,8 @@ class preprocess:
         self.encoded = False
         self.indexes = {
             'target': [0, 0],
-            'valence': [1, 1],
-            'arousal': [2, 2],
+            'valence': [2, 2],
+            'arousal': [1, 1],
             'activity': [3, 3],
             'screen': [4, 4],
             'call_sms': [5, 6],
@@ -59,7 +59,7 @@ class preprocess:
                                'morning', 'noon', 'afternoon', 'night', 'winter', 'spring', 'spring2', 'spring3',
                                'summer', 'average_mood']
         self.appcat_functions = {
-            'arctan',
+            'arctan', 'scale', 'log',
         }
         self.appcat_scale = appcat_scale
         if transform_appcat in self.appcat_functions:
@@ -78,6 +78,8 @@ class preprocess:
             self.indexes[key] = value
 
     def transform_appcat(self, value):
+        if value < 0:
+            value = 0
         value *= self.appcat_scale
         functions = {
             'default': lambda x: x * self.appcat_scale,
@@ -141,7 +143,6 @@ class preprocess:
         """
         :param record: list
         """
-        method = self.methods[0] is self.methods is not None
         arousal = []
         valence = []
         for data_point in record:
@@ -150,10 +151,12 @@ class preprocess:
         for data_point in record:
             if data_point[self.indexes['valence'][0]] is not None:
                 valence.append(data_point[self.indexes['valence'][0]])
-        return 0.5 if not len(arousal) else sum(arousal) / len(arousal) if method == 'average' else \
-            max(arousal) if  method == 'max' else min(arousal), \
-               0.5 if not len(valence) else sum(valence) / len(valence) if method == 'average' else max(valence) if \
-                   method == 'max' else min(valence)
+        return 0.5 if not len(arousal) else sum(arousal) / len(arousal) if \
+                   self.methods[self.indexes['arousal'][0]] == 'average' else \
+            max(arousal) if  self.methods[self.indexes['arousal'][0]] == 'max' else min(arousal), \
+               0.5 if not len(valence) else sum(valence) / len(valence) if \
+                   self.methods[self.indexes['valence'][0]] == 'average' else max(valence) if \
+                   self.methods[self.indexes['valence'][0]] == 'max' else min(valence)
 
     def average_time_and_season(self, record):
         """
@@ -244,7 +247,7 @@ class preprocess:
                 current_index += self.step
             self.processed_data[user] = processed_user_data
 
-    def create_dataframe(self):
+    def create_dataframe(self, convert_none_values_to_zero=False, discard_days_without_mood=False):
         data_matrix = []
         days_without_mood = set()
         for user, user_data in self.data.items():
@@ -256,11 +259,11 @@ class preprocess:
                     row = [user, day]
                     for i, value in enumerate(record):
                         if i >= self.indexes['appcat'][0] and i < self.indexes['appcat'][1]:
-                            row.append(0 if value is None else value)
+                            row.append(0 if value is None and convert_none_values_to_zero else value)
                         else:
                             row.append(value)
                     data_matrix.append(row)
-                if not has_mood:
+                if discard_days_without_mood and not has_mood:
                     days_without_mood.add(day)
         data_matrix_clear = []
         for row in data_matrix:
@@ -327,6 +330,7 @@ class preprocess:
     def bench_mark(self):
         count_accurate = 0
         count_total = 0
+        loss_total = []
         for i, user_data in enumerate(self.processed_data.values()):
             for day_data in user_data.values():
                 if self.encoded:
@@ -341,13 +345,16 @@ class preprocess:
                     # if mood is not None and day_data[0] <= day_data[-1] * 9 + 0.5 and mood > day_data[-1] * 9\
                     # - 0.5:
                     count_accurate += 1
+                if mood is not None:
+                    loss_total.append(mood - day_data[-1])
                 count_total += 1
             temp_acc = count_accurate / count_total
-
+        loss = np.array(loss_total).mean()
             # self.writer.add_scalar('Acc/val_@'+str(0.05),float(temp_acc*100), i)
 
         accuracy = count_accurate / count_total
-        return accuracy
+
+        return accuracy, loss
 
     def transform_target(self):
         self.encoded = True
@@ -455,8 +462,8 @@ if __name__ == '__main__':
         exp_name = 'runs/benchmark_win' + str(win_size)
         if os.path.exists(exp_name):
             shutil.rmtree(exp_name)
-
-        xaxis = np.ones((50)) * preprocess_instance.bench_mark()
+        acc, loss = preprocess_instance.bench_mark()
+        xaxis = np.ones((50)) * acc
 
         print('benchmark accuracy: ', preprocess_instance.bench_mark())
         '''Save preprocess_instance.processed_data:'''

@@ -13,9 +13,10 @@ class Plotter():
         methods = ['average','max','max','max','max','max','max','max','max','max',
         'max','max','max','max','max','max','max','max','average','average',
         'average','average','average','average','average','average','average','average']
-        preprocess_instance = preprocess(filename, window_size=1, methods=methods)
+        preprocess_instance = preprocess(filename, window_size=1,transform_appcat='arctan',appcat_scale=1/60, methods=methods)
         preprocess_instance.normalize()
         preprocess_instance.bin()
+        
         self.df = preprocess_instance.create_dataframe()
         self.df_pros = preprocess_instance.create_dataframe_pros()
 
@@ -69,7 +70,7 @@ class Plotter():
         if var is None:
             print('you have to select a type of variable to plot...')
             return None
-        sns.set(style='whitegrid', palette="deep", font_scale=1.1, rc={"figure.figsize": [8, 5]})
+        # sns.set(style='whitegrid', palette="deep", font_scale=1.1, rc={"figure.figsize": [15, 15]})
         # meh = self.df.dropna(subset=[var])
         cols = self.numerical if var == 'num' else self.categorical if var == 'cat' else self.times if var == 'times' else self.months
         if pros and var=='num':
@@ -77,7 +78,7 @@ class Plotter():
             # print(df.head(1))
         if var != 'cat':
 
-            df[cols].hist(bins=self.bins[var], figsize=(20, 9), layout=(5, 4))
+            df[cols].hist(bins=self.bins[var], figsize=(20, 15), layout=(5, 4))
             if save:
                 
                 name ='plots/'+var+"_histogram.png" if not pros else 'plots/'+var+"_pros_histogram.png"
@@ -98,8 +99,8 @@ if __name__ == "__main__":
       
     plotter = Plotter()
     # 
-    # for var in ['cat','num','times','months']:
-        # ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=True)
+    for var in ['num','cat','times','months']:
+        ans = plotter.histogram_ofvars(var=var,show=True,save=True,pros=True)
         # ans = plotter.histogram_ofvars(var=var,show=False,save=True,pros=False)
     # print(plotter.df_pros.head(2))
     
