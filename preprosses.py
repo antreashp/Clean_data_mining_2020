@@ -19,7 +19,7 @@ var_ids = ['mood', 'circumplex.arousal', 'circumplex.valence', 'activity', 'scre
 
 
 class preprocess:
-    def __init__(self, filename, window_size=1, methods=None, writer=None, transform_appcat=None, appcat_scale=1 / 60):
+    def __init__(self, filename, window_size=1, methods=None, writer=None, transform_appcat=None, appcat_scale=60 / 60):
         """
         :param filename: str
         :param window_size: int

@@ -20,7 +20,7 @@ class Experiment():
                    'max', 'max', 'max', 'max', 'max', 'max', 'max', 'max', 'average', 'average',
                    'average', 'average', 'average', 'average', 'average', 'average', 'average', 'average'] if options['methods'] is None else options['methods']
             filename = 'data/RAW_Data.pickle'
-            self.preprocess_instance = preprocess(filename, window_size=self.win_size, methods=self.methods)
+            self.preprocess_instance = preprocess(filename, window_size=self.win_size,transform_appcat='arctan',appcat_scale=1/60, methods=self.methods)
             self.preprocess_instance.normalize()
 
             self.preprocess_instance.bin(include_remainder=False)

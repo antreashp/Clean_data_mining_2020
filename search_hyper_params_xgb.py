@@ -5,7 +5,7 @@ from preprosses import preprocess
 
 import matplotlib.pyplot as plt
 
-HPO_PARAMS = {'n_calls':100,
+HPO_PARAMS = {'n_calls':20,
               'n_random_starts':2,
               'base_estimator':'ET',
               'acq_func':'EI',
@@ -84,20 +84,20 @@ def search(**params):
         options.update(mod_opt_xgb)
 
         exp.update_opt(options)
-        res = exp.train_and_test()
-        print('accuracy: ',res)
+        res,loss = exp.train_and_test()
+        print('accuracy: ',res,'loss: ',loss)
         return 1 - res
 
 
 
 from skopt.plots import plot_convergence
-dummy_results = skopt.dummy_minimize(search, SPACE,n_calls=50)
+dummy_results = skopt.dummy_minimize(search, SPACE,n_calls=20)
 skopt.dump(dummy_results, 'results/dummy_xgb_hyper.pkl')
 plt.figure(1)
 plot_convergence(dummy_results)
 plt.savefig("plots/dummy_xgb_hyper_accinv.png")
 
-gp_results = skopt.gp_minimize(search, SPACE,n_calls=100)
+gp_results = skopt.gp_minimize(search, SPACE,n_calls=20)
 skopt.dump(gp_results, 'results/gp_xgb_hyper.pkl')
 plt.figure(2)
 plot_convergence(gp_results)
