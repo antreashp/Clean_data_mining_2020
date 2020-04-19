@@ -5,7 +5,7 @@ from preprosses import preprocess
 
 import matplotlib.pyplot as plt
 
-HPO_PARAMS = {'n_calls':1000,
+HPO_PARAMS = {'n_calls':100,
               'n_random_starts':2,
               'base_estimator':'ET',
               'acq_func':'EI',
@@ -34,7 +34,7 @@ SPACE =[skopt.space.Real(0.0001, 0.1, name='lr', prior='log-uniform'),
         # skopt.space.Real(0.994, 0.999, name='pca_var_hold'),
         skopt.space.Integer(10, 256, name='alpha'),
         skopt.space.Real(0.01, 0.3, name='colsample_bytree'),
-        skopt.space.Categorical([64, 128,512,1024,4096,10000], name='n_estimators'),
+        skopt.space.Integer(5, 10000, name='n_estimators'),
         skopt.space.Categorical([True,False], name='use_pca'),]
         # skopt.space.Categorical([True,False], name='transform_targets'),]
 
@@ -97,7 +97,7 @@ plt.figure(1)
 plot_convergence(dummy_results)
 plt.savefig("plots/dummy_xgb_hyper_accinv.png")
 
-gp_results = skopt.gp_minimize(search, SPACE,n_calls=1000)
+gp_results = skopt.gp_minimize(search, SPACE,n_calls=100)
 skopt.dump(gp_results, 'results/gp_xgb_hyper.pkl')
 plt.figure(2)
 plot_convergence(gp_results)

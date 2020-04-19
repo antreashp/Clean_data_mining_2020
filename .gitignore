@@ -8,5 +8,5 @@ models/*
 *.pyc
 *.xml___jb_tmp___
 *.iml
-results/*
+*.pkl
 .ipynb_checkpoints/numerical_analysis-checkpoint.ipynb
