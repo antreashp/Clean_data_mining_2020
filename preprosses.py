@@ -141,7 +141,6 @@ class preprocess:
         """
         :param record: list
         """
-        method = self.methods[0] is self.methods is not None
         arousal = []
         valence = []
         for data_point in record:
@@ -150,10 +149,11 @@ class preprocess:
         for data_point in record:
             if data_point[self.indexes['valence'][0]] is not None:
                 valence.append(data_point[self.indexes['valence'][0]])
-        return 0.5 if not len(arousal) else sum(arousal) / len(arousal) if method == 'average' else \
-            max(arousal) if  method == 'max' else min(arousal), \
-               0.5 if not len(valence) else sum(valence) / len(valence) if method == 'average' else max(valence) if \
-                   method == 'max' else min(valence)
+        return 0.5 if not len(arousal) else sum(arousal) / len(arousal) if self.methods[self.indexes['arousal']] == 'average' else \
+            max(arousal) if  self.methods[self.indexes['arousal']] == 'max' else min(arousal), \
+               0.5 if not len(valence) else sum(valence) / len(valence) if self.methods[self.indexes['valence']] == \
+                                                                           'average' else max(valence) if \
+                   self.methods[self.indexes['valence']] == 'max' else min(valence)
 
     def average_time_and_season(self, record):
         """
